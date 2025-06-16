@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Mark Entry App</title>
+  <link rel="manifest" href="manifest.json" />
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const container = document.getElementById("mark-container");
+      const questions = 10, students = 20, subparts = ["a", "b", "c"];
+      const options = [0.5, 1.0, 1.5, 2.0];
+
+      for (let s = 1; s <= students; s++) {
+        const studentRow = document.createElement("div");
+        studentRow.className = "student-row";
+        const h4 = document.createElement("h4");
+        h4.textContent = "Student " + String(s).padStart(2, "0");
+        studentRow.appendChild(h4);
+
+        for (let q = 1; q <= questions; q++) {
+          subparts.forEach(sub => {
+            const label = document.createElement("label");
+            label.textContent = `Q${q}.${sub}: `;
+            const select = document.createElement("select");
+            select.dataset.student = s;
+            select.dataset.question = `Q${q}.${sub}`;
+            const defaultOption = document.createElement("option");
+            defaultOption.value = "0";
+            defaultOption.textContent = "-";
+            select.appendChild(defaultOption);
+            options.forEach(opt => {
+              const option = document.createElement("option");
+              option.value = opt;
+              option.textContent = opt;
+              select.appendChild(option);
+            });
+            studentRow.appendChild(label);
+            studentRow.appendChild(select);
+          });
+        }
+        container.appendChild(studentRow);
+      }
+
+      document.getElementById("displayResults").onclick = () => {
+        const results = Array.from(document.querySelectorAll("select")).reduce((acc, el) => {
+          const student = el.dataset.student;
+          const question = el.dataset.question;
+          const value = parseFloat(el.value) || 0;
+          if (!acc[student]) acc[student] = { total: 0, details: {} };
+          acc[student].total += value;
+          const qMain = question.split('.')[0];
+          acc[student].details[qMain] = (acc[student].details[qMain] || 0) + value;
+          return acc;
+        }, {});
+        let table = `<h2>Results</h2><table border='1'><tr><th>Student</th>`;
+        for (let q = 1; q <= questions; q++) table += `<th>Q${q}</th>`;
+        table += `<th>Total</th></tr>`;
+        for (let s = 1; s <= students; s++) {
+          const student = String(s).padStart(2, "0");
+          table += `<tr><td>${student}</td>`;
+          for (let q = 1; q <= questions; q++) {
+            table += `<td>${(results[student]?.details[`Q${q}`] || 0).toFixed(1)}</td>`;
+          }
+          table += `<td>${(results[student]?.total || 0).toFixed(1)}</td></tr>`;
+        }
+        table += `</table>`;
+        const resultWindow = window.open("", "_blank");
+        resultWindow.document.write(table);
+        resultWindow.document.close();
+      };
+    });
+  </script>
+  <style>
+    body { font-family: sans-serif; background: #fff; padding: 10px; }
+    select { margin: 2px; }
+    label { margin-right: 6px; }
+    .student-row { margin-bottom: 10px; border-bottom: 1px solid #ccc; padding-bottom: 8px; }
+    button { margin-top: 20px; padding: 8px 16px; font-size: 16px; }
+  </style>
+</head>
+<body>
+  <h2>Mark Entry Interface</h2>
+  <div id="mark-container"></div>
+  <button id="displayResults">📊 Display Results</button>
+</body>
+</html>
