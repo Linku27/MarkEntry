@@ -4,123 +4,85 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Mark Entry App</title>
+  <link rel="manifest" href="manifest.json" />
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const container = document.getElementById("mark-container");
+      const questions = 10, students = 20, subparts = ["a", "b", "c"];
+      const options = [0.5, 1.0, 1.5, 2.0];
+
+      for (let s = 1; s <= students; s++) {
+        const studentRow = document.createElement("div");
+        studentRow.className = "student-row";
+        const h4 = document.createElement("h4");
+        h4.textContent = "Student " + String(s).padStart(2, "0");
+        studentRow.appendChild(h4);
+
+        for (let q = 1; q <= questions; q++) {
+          subparts.forEach(sub => {
+            const label = document.createElement("label");
+            label.textContent = `Q${q}.${sub}: `;
+            const select = document.createElement("select");
+            select.dataset.student = s;
+            select.dataset.question = `Q${q}.${sub}`;
+            const defaultOption = document.createElement("option");
+            defaultOption.value = "0";
+            defaultOption.textContent = "-";
+            select.appendChild(defaultOption);
+            options.forEach(opt => {
+              const option = document.createElement("option");
+              option.value = opt;
+              option.textContent = opt;
+              select.appendChild(option);
+            });
+            studentRow.appendChild(label);
+            studentRow.appendChild(select);
+          });
+        }
+        container.appendChild(studentRow);
+      }
+
+      document.getElementById("displayResults").onclick = () => {
+        const results = Array.from(document.querySelectorAll("select")).reduce((acc, el) => {
+          const student = el.dataset.student;
+          const question = el.dataset.question;
+          const value = parseFloat(el.value) || 0;
+          if (!acc[student]) acc[student] = { total: 0, details: {} };
+          acc[student].total += value;
+          const qMain = question.split('.')[0];
+          acc[student].details[qMain] = (acc[student].details[qMain] || 0) + value;
+          return acc;
+        }, {});
+        let table = `<h2>Results</h2><table border='1'><tr><th>Student</th>`;
+        for (let q = 1; q <= questions; q++) table += `<th>Q${q}</th>`;
+        table += `<th>Total</th></tr>`;
+        for (let s = 1; s <= students; s++) {
+          const student = String(s).padStart(2, "0");
+          table += `<tr><td>${student}</td>`;
+          for (let q = 1; q <= questions; q++) {
+            table += `<td>${(results[student]?.details[`Q${q}`] || 0).toFixed(1)}</td>`;
+          }
+          table += `<td>${(results[student]?.total || 0).toFixed(1)}</td></tr>`;
+        }
+        table += `</table>`;
+        const resultWindow = window.open("", "_blank");
+        resultWindow.document.write(table);
+        resultWindow.document.close();
+      };
+    });
+  </script>
   <style>
-    body { font-family: sans-serif; margin: 0; padding: 10px; background: #fff; }
-    .mark-button {
-      padding: 5px 10px;
-      margin: 4px 4px 8px 0;
-      border: 1px solid #999;
-      border-radius: 4px;
-      background: #eee;
-      cursor: pointer;
-    }
-    .mark-button.selected {
-      background: #4caf50;
-      color: #fff;
-    }
-    .btn {
-      display: inline-block;
-      padding: 10px;
-      margin: 15px 0;
-      background: #2196f3;
-      color: white;
-      border: none;
-      border-radius: 4px;
-      cursor: pointer;
-    }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 15px;
-    }
-    th, td {
-      border: 1px solid #ccc;
-      padding: 6px;
-      text-align: center;
-    }
-    #entryScreen, #resultScreen { display: none; }
+    body { font-family: sans-serif; background: #fff; padding: 10px; }
+    select { margin: 2px; }
+    label { margin-right: 6px; }
+    .student-row { margin-bottom: 10px; border-bottom: 1px solid #ccc; padding-bottom: 8px; }
+    button { margin-top: 20px; padding: 8px 16px; font-size: 16px; }
   </style>
 </head>
 <body>
-  <div id="entryScreen">
-    <h3>Mark Entry - Student 01</h3>
-    <div id="markForm"></div>
-    <button class="btn" onclick="showResult()">Display Result</button>
-  </div>
-
-  <div id="resultScreen">
-    <h3>Student Result</h3>
-    <div id="resultContent"></div>
-    <button class="btn" onclick="goBack()">Back</button>
-  </div>
-
-  <script>
-    const questions = 10;
-    const subQuestions = ['a', 'b', 'c'];
-    const studentMarks = Array.from({ length: questions }, () => [0, 0, 0]);
-
-    function createForm() {
-      const container = document.getElementById('markForm');
-      for (let q = 0; q < questions; q++) {
-        const section = document.createElement('div');
-        section.innerHTML = `<b>Q${q + 1}</b>`;
-        subQuestions.forEach((sq, i) => {
-          const subDiv = document.createElement('div');
-          subDiv.innerHTML = `Q${q + 1}.${sq}: `;
-          [0.5, 1.0, 1.5, 2.0].forEach(val => {
-            const btn = document.createElement('button');
-            btn.className = 'mark-button';
-            btn.textContent = val;
-            btn.onclick = () => {
-              [...subDiv.querySelectorAll('.mark-button')].forEach(b => b.classList.remove('selected'));
-              btn.classList.add('selected');
-              studentMarks[q][i] = val;
-            };
-            subDiv.appendChild(btn);
-          });
-          section.appendChild(subDiv);
-        });
-        container.appendChild(section);
-      }
-    }
-
-    function showResult() {
-      const container = document.getElementById('resultContent');
-      container.innerHTML = '';
-      let total = 0;
-
-      const table = document.createElement('table');
-      const head = document.createElement('tr');
-      head.innerHTML = `<th>Q</th><th>a</th><th>b</th><th>c</th><th>Total</th>`;
-      table.appendChild(head);
-
-      studentMarks.forEach((q, i) => {
-        const [a, b, c] = q;
-        const qTotal = a + b + c;
-        total += qTotal;
-        const row = document.createElement('tr');
-        row.innerHTML = `<td>Q${i + 1}</td><td>${a}</td><td>${b}</td><td>${c}</td><td>${qTotal}</td>`;
-        table.appendChild(row);
-      });
-
-      const last = document.createElement('tr');
-      last.innerHTML = `<td colspan="4"><b>Total</b></td><td><b>${total} / 60</b></td>`;
-      table.appendChild(last);
-
-      container.appendChild(table);
-      document.getElementById('entryScreen').style.display = 'none';
-      document.getElementById('resultScreen').style.display = 'block';
-    }
-
-    function goBack() {
-      document.getElementById('entryScreen').style.display = 'block';
-      document.getElementById('resultScreen').style.display = 'none';
-    }
-
-    window.onload = () => {
-      document.getElementById('entryScreen').style.display = 'block';
-      createForm();
-    };
-  </script>
+  <h2>Mark Entry Interface</h2>
+  <div id="mark-container"></div>
+  <button id="displayResults">📊 Display Results</button>
 </body>
 </html>
+
