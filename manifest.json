@@ -1,0 +1,15 @@
+{
+  "name": "Mark Entry App",
+  "short_name": "MarkEntry",
+  "start_url": "MarkEntryApp_PWA_WithDisplay.html",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#ffffff",
+  "icons": [
+    {
+      "src": "icon.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    }
+  ]
+}
