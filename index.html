@@ -32,11 +32,12 @@
       background: #f44336;
       color: white;
       border: none;
-      padding: 5px 10px;
-      margin: 8px 0;
+      padding: 2px 8px;
+      margin-left: 10px;
       border-radius: 4px;
       font-size: 12px;
       cursor: pointer;
+      vertical-align: middle;
     }
     table {
       width: 100%;
@@ -49,6 +50,13 @@
       text-align: center;
     }
     #entryScreen, #resultScreen { display: none; }
+    .question-block {
+      margin-bottom: 15px;
+    }
+    .question-header {
+      font-weight: bold;
+      margin-bottom: 4px;
+    }
   </style>
 </head>
 <body>
@@ -75,8 +83,25 @@
       container.innerHTML = '';
       for (let q = 0; q < questions; q++) {
         const section = document.createElement('div');
-        section.innerHTML = `<b>Q${q + 1}</b>`;
+        section.className = 'question-block';
         section.id = `q${q}`;
+
+        // Header + Reset button inline
+        const header = document.createElement('div');
+        header.className = 'question-header';
+        header.innerHTML = `Q${q + 1}`;
+
+        const resetQBtn = document.createElement('button');
+        resetQBtn.textContent = `Reset`;
+        resetQBtn.className = 'reset-q-btn';
+        resetQBtn.onclick = () => {
+          studentMarks[q] = [null, null, null];
+          updateQuestionUI(q);
+        };
+        header.appendChild(resetQBtn);
+        section.appendChild(header);
+
+        // Sub-question inputs
         subQuestions.forEach((sq, i) => {
           const subDiv = document.createElement('div');
           subDiv.innerHTML = `Q${q + 1}.${sq}: `;
@@ -94,14 +119,6 @@
           section.appendChild(subDiv);
         });
 
-        const resetQBtn = document.createElement('button');
-        resetQBtn.textContent = `Reset Q${q + 1}`;
-        resetQBtn.className = 'reset-q-btn';
-        resetQBtn.onclick = () => {
-          studentMarks[q] = [null, null, null];
-          updateQuestionUI(q);
-        };
-        section.appendChild(resetQBtn);
         container.appendChild(section);
       }
     }
