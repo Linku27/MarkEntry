@@ -28,6 +28,16 @@
       border-radius: 4px;
       cursor: pointer;
     }
+    .reset-q-btn {
+      background: #f44336;
+      color: white;
+      border: none;
+      padding: 5px 10px;
+      margin: 8px 0;
+      border-radius: 4px;
+      font-size: 12px;
+      cursor: pointer;
+    }
     table {
       width: 100%;
       border-collapse: collapse;
@@ -46,7 +56,7 @@
     <h3>Mark Entry - Student 01</h3>
     <div id="markForm"></div>
     <button class="btn" onclick="showResult()">Display Result</button>
-    <button class="btn" style="background: #f44336;" onclick="resetForm()">Reset</button>
+    <button class="btn" style="background: #f44336;" onclick="resetForm()">Reset All</button>
   </div>
 
   <div id="resultScreen">
@@ -58,7 +68,7 @@
   <script>
     const questions = 10;
     const subQuestions = ['a', 'b', 'c'];
-    let studentMarks = Array.from({ length: questions }, () => [0, 0, 0]);
+    let studentMarks = Array.from({ length: questions }, () => [null, null, null]);
 
     function createForm() {
       const container = document.getElementById('markForm');
@@ -66,10 +76,11 @@
       for (let q = 0; q < questions; q++) {
         const section = document.createElement('div');
         section.innerHTML = `<b>Q${q + 1}</b>`;
+        section.id = `q${q}`;
         subQuestions.forEach((sq, i) => {
           const subDiv = document.createElement('div');
           subDiv.innerHTML = `Q${q + 1}.${sq}: `;
-          [0.5, 1.0, 1.5, 2.0].forEach(val => {
+          [0, 0.5, 1.0, 1.5, 2.0].forEach(val => {
             const btn = document.createElement('button');
             btn.className = 'mark-button';
             btn.textContent = val;
@@ -82,13 +93,28 @@
           });
           section.appendChild(subDiv);
         });
+
+        const resetQBtn = document.createElement('button');
+        resetQBtn.textContent = `Reset Q${q + 1}`;
+        resetQBtn.className = 'reset-q-btn';
+        resetQBtn.onclick = () => {
+          studentMarks[q] = [null, null, null];
+          updateQuestionUI(q);
+        };
+        section.appendChild(resetQBtn);
         container.appendChild(section);
       }
     }
 
+    function updateQuestionUI(qIndex) {
+      const section = document.getElementById(`q${qIndex}`);
+      const buttons = section.querySelectorAll('.mark-button');
+      buttons.forEach(btn => btn.classList.remove('selected'));
+    }
+
     function resetForm() {
-      studentMarks = Array.from({ length: questions }, () => [0, 0, 0]);
-      createForm(); // Regenerate form and reset buttons
+      studentMarks = Array.from({ length: questions }, () => [null, null, null]);
+      createForm(); // Reset UI
     }
 
     function showResult() {
@@ -103,10 +129,13 @@
 
       studentMarks.forEach((q, i) => {
         const [a, b, c] = q;
-        const qTotal = a + b + c;
+        const aVal = a ?? '_';
+        const bVal = b ?? '_';
+        const cVal = c ?? '_';
+        const qTotal = (a ?? 0) + (b ?? 0) + (c ?? 0);
         total += qTotal;
         const row = document.createElement('tr');
-        row.innerHTML = `<td>Q${i + 1}</td><td>${a}</td><td>${b}</td><td>${c}</td><td>${qTotal}</td>`;
+        row.innerHTML = `<td>Q${i + 1}</td><td>${aVal}</td><td>${bVal}</td><td>${cVal}</td><td>${qTotal}</td>`;
         table.appendChild(row);
       });
 
