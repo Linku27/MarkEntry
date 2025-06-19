@@ -60,12 +60,17 @@
   </style>
 </head>
 <body>
-  <div id="entryScreen">
-    <h3>Mark Entry - Student 01</h3>
-    <div id="markForm"></div>
-    <button class="btn" onclick="showResult()">Display Result</button>
-    <button class="btn" style="background: #f44336;" onclick="resetForm()">Reset All</button>
+<div id="entryScreen">
+  <div style="display: flex; justify-content: space-between; align-items: center;">
+    <h3 style="margin: 0;">Mark Entry - Student 01</h3>
+    <button class="btn" style="background: #f44336; padding: 6px 10px;" onclick="resetForm()">Reset All</button>
   </div>
+
+  <div id="markForm" style="margin-top: 10px;"></div>
+
+  <button class="btn" onclick="showResult()">Display Result</button>
+  <button class="btn" style="background: #f44336;" onclick="resetForm()">Reset All</button>
+</div>
 
   <div id="resultScreen">
     <h3>Student Result</h3>
