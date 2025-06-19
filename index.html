@@ -52,7 +52,7 @@
     #entryScreen, #resultScreen { display: none; }
     .question-block { margin-bottom: 15px; }
     .question-header { font-weight: bold; margin-bottom: 4px; }
-    #studentSelect { margin: 10px 0; padding: 8px; font-size: 16px; }
+    #studentSelect, #studentSelectResult { margin: 10px 0; padding: 8px; font-size: 16px; }
   </style>
 </head>
 <body>
@@ -72,7 +72,13 @@
   </div>
 
   <div id="resultScreen">
-    <h3 id="studentResultTitle"></h3>
+    <div style="display: flex; justify-content: space-between; align-items: center;">
+      <h3 id="studentResultTitle"></h3>
+      <div>
+        <label for="studentSelectResult"><strong>View Student:</strong></label>
+        <select id="studentSelectResult"></select>
+      </div>
+    </div>
     <div id="resultContent"></div>
     <button class="btn" onclick="goBack()">Back</button>
   </div>
@@ -88,17 +94,26 @@
 
     function initDropdown() {
       const select = document.getElementById('studentSelect');
+      const selectResult = document.getElementById('studentSelectResult');
       studentIds.forEach(id => {
-        const option = document.createElement('option');
-        option.value = id;
-        option.textContent = `Student ${id}`;
-        select.appendChild(option);
+        const option1 = document.createElement('option');
+        option1.value = id;
+        option1.textContent = `Student ${id}`;
+        select.appendChild(option1);
+
+        const option2 = document.createElement('option');
+        option2.value = id;
+        option2.textContent = `Student ${id}`;
+        selectResult.appendChild(option2);
       });
       select.value = currentStudentId;
       select.onchange = () => {
         saveCurrentStudentMarks();
         currentStudentId = select.value;
         loadStudentMarks();
+      };
+      selectResult.onchange = () => {
+        showStudentResult(selectResult.value);
       };
     }
 
@@ -171,6 +186,11 @@
 
     function showResult() {
       saveCurrentStudentMarks();
+      document.getElementById('studentSelectResult').value = currentStudentId;
+      showStudentResult(currentStudentId);
+    }
+
+    function showStudentResult(studentId) {
       const container = document.getElementById('resultContent');
       container.innerHTML = '';
       let total = 0;
@@ -182,7 +202,7 @@
 
       const formatMark = m => m === null ? '_' : (Number.isInteger(m) ? m.toString() : m.toFixed(1));
 
-      studentMarks.forEach((q, i) => {
+      allStudentMarks[studentId].forEach((q, i) => {
         const [a, b, c] = q;
         const aVal = formatMark(a);
         const bVal = formatMark(b);
@@ -199,7 +219,7 @@
       table.appendChild(last);
 
       container.appendChild(table);
-      document.getElementById('studentResultTitle').textContent = `Result of Student ${currentStudentId}`;
+      document.getElementById('studentResultTitle').textContent = `Result of Student ${studentId}`;
       document.getElementById('entryScreen').style.display = 'none';
       document.getElementById('resultScreen').style.display = 'block';
     }
@@ -226,4 +246,3 @@
   </script>
 </body>
 </html>
-
