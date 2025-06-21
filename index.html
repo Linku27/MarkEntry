@@ -200,13 +200,14 @@
       head.innerHTML = `<th>Q</th><th>a</th><th>b</th><th>c</th><th>Total</th>`;
       table.appendChild(head);
 
-      const formatMark = m => m === null ? '_' : (Number.isInteger(m) ? m.toString() : m.toFixed(1));
+      
 
       allStudentMarks[studentId].forEach((q, i) => {
         const [a, b, c] = q;
-        const aVal = formatMark(a);
-        const bVal = formatMark(b);
-        const cVal = formatMark(c);
+        const aVal = a !== null ? a.toFixed(1) : '_';
+        const bVal = b !== null ? b.toFixed(1) : '_';
+        const cVal = c !== null ? c.toFixed(1) : '_';
+
         const qTotal = (a ?? 0) + (b ?? 0) + (c ?? 0);
         total += qTotal;
         const row = document.createElement('tr');
